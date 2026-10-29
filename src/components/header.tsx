@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Menu, LogOut, Shield, User } from "lucide-react";
+import { GraduationCap, Menu, LogOut, Shield, User } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { deconnexion } from "@/app/actions/auth";
 
@@ -23,8 +23,8 @@ export async function Header() {
       </div>
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
         <Link href="/" className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primaire text-sm font-bold text-or">
-            UET
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primaire text-or">
+            <GraduationCap size={22} />
           </span>
           <span className="leading-tight">
             <span className="block text-sm font-bold text-primaire">UET-UCAO</span>
