@@ -1,36 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Plateforme pédagogique UET-UCAO
 
-## Getting Started
+Ressources pédagogiques (cours, sujets, TD, corrigés en PDF) pour les étudiants de l'UCAO-UUT, organisées par **Institut → Filière → Niveau → Matière**, avec un espace **Communiqués** (likes et commentaires).
 
-First, run the development server:
+- **Site** : Next.js 16 (React, TypeScript, Tailwind CSS)
+- **Base de données, fichiers, comptes** : Supabase (offre gratuite, sans carte bancaire)
+- **Hébergement** : Vercel (gratuit)
+
+## Fonctionnalités
+
+| Public (sans compte) | Étudiant connecté | Administrateur |
+|---|---|---|
+| Parcourir et télécharger les PDF | Aimer les communiqués | Gérer instituts, filières, matières |
+| Rechercher | Commenter | Publier / supprimer des PDF |
+| Lire les communiqués | Supprimer ses commentaires | Publier des communiqués, modérer |
+| | | Nommer d'autres administrateurs |
+
+---
+
+## 1. Créer le projet Supabase
+
+1. Créez un compte sur https://supabase.com puis **New project** (région conseillée : `West EU (Paris)` ou `Frankfurt`).
+2. Dans **SQL Editor > New query**, collez et exécutez le contenu de [`supabase/schema.sql`](supabase/schema.sql).
+3. Dans une nouvelle requête, exécutez [`supabase/seed.sql`](supabase/seed.sql) (les 4 instituts et leurs filières).
+4. Dans **Authentication > URL Configuration** :
+   - **Site URL** : `http://localhost:3000` (puis l'adresse Vercel une fois en ligne)
+   - **Redirect URLs** : ajoutez `http://localhost:3000/auth/callback` et `https://VOTRE-SITE.vercel.app/auth/callback`
+
+## 2. Lancer le site sur votre ordinateur
 
 ```bash
+cd web
+cp .env.example .env.local   # puis remplir les 2 valeurs
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Les valeurs se trouvent dans Supabase : **Project Settings > API Keys** (« Publishable key ») et **Project Settings > Data API** (« Project URL »).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Ouvrez http://localhost:3000.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 3. Créer le premier administrateur
 
-## Learn More
+1. Inscrivez-vous sur le site (`/inscription`) et confirmez votre e-mail.
+2. Dans Supabase, **SQL Editor**, exécutez (avec votre e-mail) :
 
-To learn more about Next.js, take a look at the following resources:
+```sql
+update public.profiles set role = 'admin'
+where id = (select id from auth.users where email = 'votre@email.com');
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. Reconnectez-vous : le bouton **Administration** apparaît. Les administrateurs suivants peuvent être nommés depuis **Administration > Utilisateurs**.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 4. Ajouter du contenu
 
-## Deploy on Vercel
+1. **Administration > Instituts & filières** : ouvrez une filière et ajoutez les matières de chaque niveau (une par ligne).
+2. **Administration > Ressources PDF > Ajouter un PDF** : choisissez institut, filière, niveau, matière, puis le fichier (50 Mo max).
+3. **Administration > Communiqués** : publiez les informations (image facultative, épinglage possible).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 5. Mettre en ligne (Vercel)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Publiez le dossier `web` sur GitHub.
+2. Sur https://vercel.com, **Add New > Project**, importez le dépôt.
+3. Ajoutez les variables d'environnement `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
+4. Déployez, puis mettez à jour la **Site URL** et les **Redirect URLs** dans Supabase.
+
+## Limites de l'offre gratuite Supabase
+
+- 500 Mo de base de données, **1 Go de fichiers** (≈ 300 à 1000 PDF selon leur taille), 5 Go de bande passante / mois.
+- Un projet gratuit inactif pendant 7 jours est mis en pause (il se réactive depuis le tableau de bord).
+- Astuce : compressez les PDF scannés (ex. https://www.ilovepdf.com/fr/compresser_pdf) avant de les publier.
+
+## Structure du code
+
+```
+supabase/          schéma SQL + données de départ
+src/app/           pages (accueil, instituts, filières, matières, recherche, communiqués, admin)
+src/app/actions/   actions serveur (connexion, likes, commentaires)
+src/app/admin/     espace administrateur et ses actions
+src/components/    composants réutilisables
+src/lib/           client Supabase, types, utilitaires
+```

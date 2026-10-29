@@ -1,69 +1,98 @@
-import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight, BookOpen, Download, FileText, Megaphone, Search } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import { InstitutCard } from "@/components/institut-card";
+import { CommuniqueCard } from "@/components/communique-card";
+import type { Communique, Institut } from "@/lib/types";
 
-export default function Home() {
+export default async function Accueil() {
+  const supabase = await createClient();
+
+  const [{ data: instituts }, { data: communiques }, { count: nbRessources }] = await Promise.all([
+    supabase.from("instituts").select("*, filieres(count)").order("ordre"),
+    supabase
+      .from("communiques")
+      .select("*, likes(count), commentaires(count)")
+      .order("epingle", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(3),
+    supabase.from("ressources").select("*", { count: "exact", head: true }),
+  ]);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <>
+      {/* Bandeau d'accueil */}
+      <section className="bg-primaire text-white">
+        <div className="mx-auto max-w-6xl px-4 py-14 md:py-20">
+          <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-or">
+            Union des Étudiants Tchadiens · UCAO-UUT
           </p>
+          <h1 className="max-w-3xl text-3xl font-bold leading-tight md:text-5xl">
+            Tous vos cours et sujets d&apos;examen, au même endroit.
+          </h1>
+          <p className="mt-4 max-w-2xl text-white/80 md:text-lg">
+            Consultez et téléchargez gratuitement les ressources pédagogiques en PDF, classées par
+            institut, filière, niveau et matière.
+          </p>
+
+          <form action="/recherche" className="mt-8 flex max-w-xl gap-2">
+            <div className="relative flex-1">
+              <Search size={18} className="absolute top-1/2 left-3 -translate-y-1/2 text-attenue" />
+              <input
+                name="q"
+                placeholder="Rechercher un cours, une matière…"
+                className="champ h-12 pl-10 text-base text-texte"
+              />
+            </div>
+            <button className="btn h-12 bg-or px-5 font-semibold text-primaire hover:brightness-95">
+              Rechercher
+            </button>
+          </form>
+
+          <div className="mt-8 flex flex-wrap gap-6 text-sm text-white/80">
+            <span className="flex items-center gap-2"><FileText size={18} className="text-or" /> {nbRessources ?? 0} ressources</span>
+            <span className="flex items-center gap-2"><BookOpen size={18} className="text-or" /> {instituts?.length ?? 0} instituts</span>
+            <span className="flex items-center gap-2"><Download size={18} className="text-or" /> Accès libre et gratuit</span>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* Instituts */}
+      <section className="mx-auto max-w-6xl px-4 py-12">
+        <h2 className="mb-1 text-2xl font-bold text-primaire">Choisissez votre institut</h2>
+        <p className="mb-6 text-attenue">Puis votre filière, votre niveau et votre matière.</p>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {(instituts as (Institut & { filieres: { count: number }[] })[] | null)?.map((i) => (
+            <InstitutCard key={i.id} institut={i} nbFilieres={i.filieres[0]?.count} />
+          ))}
         </div>
-      </main>
-    </div>
+      </section>
+
+      {/* Communiqués */}
+      <section className="mx-auto max-w-6xl px-4">
+        <div className="mb-6 flex items-end justify-between gap-4">
+          <div>
+            <h2 className="flex items-center gap-2 text-2xl font-bold text-primaire">
+              <Megaphone size={24} /> Derniers communiqués
+            </h2>
+            <p className="text-attenue">Les informations du bureau de l&apos;UET.</p>
+          </div>
+          <Link href="/communiques" className="flex items-center gap-1 text-sm font-medium text-primaire hover:underline">
+            Tout voir <ArrowRight size={16} />
+          </Link>
+        </div>
+        {communiques && communiques.length > 0 ? (
+          <div className="grid gap-4 md:grid-cols-3">
+            {communiques.map((c) => (
+              <CommuniqueCard key={c.id} communique={c as CommuniqueAvecStats} />
+            ))}
+          </div>
+        ) : (
+          <p className="carte p-6 text-center text-attenue">Aucun communiqué pour le moment.</p>
+        )}
+      </section>
+    </>
   );
 }
+
+type CommuniqueAvecStats = Communique & { likes: { count: number }[]; commentaires: { count: number }[] };

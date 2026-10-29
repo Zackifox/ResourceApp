@@ -1,26 +1,48 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+/* Couleurs inspirées du drapeau tchadien : bleu, or, rouge */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-primaire: #0b2e6b;
+  --color-primaire-clair: #1d4fa3;
+  --color-primaire-pale: #e8eef9;
+  --color-or: #f2b705;
+  --color-or-pale: #fff6d9;
+  --color-rouge: #c8102e;
+  --color-fond: #f6f7fb;
+  --color-texte: #1a2233;
+  --color-attenue: #5b6478;
+  --color-bordure: #e2e6ef;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body {
+  background: var(--color-fond);
+  color: var(--color-texte);
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Composants réutilisables */
+@utility carte {
+  @apply rounded-xl border border-bordure bg-white shadow-sm;
+}
+@utility btn {
+  @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60;
+}
+@utility btn-primaire {
+  @apply btn bg-primaire text-white hover:bg-primaire-clair;
+}
+@utility btn-secondaire {
+  @apply btn border border-bordure bg-white text-texte hover:bg-fond;
+}
+@utility btn-danger {
+  @apply btn bg-rouge text-white hover:opacity-90;
+}
+@utility champ {
+  @apply w-full rounded-lg border border-bordure bg-white px-3 py-2 text-sm outline-none focus:border-primaire-clair focus:ring-2 focus:ring-primaire-pale;
+}
+@utility etiquette {
+  @apply mb-1 block text-sm font-medium text-texte;
+}
+@utility badge {
+  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
 }
