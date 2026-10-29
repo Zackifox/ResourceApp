@@ -6,13 +6,14 @@ import { getSession } from "@/lib/auth";
 import { FilAriane } from "@/components/fil-ariane";
 import { BoutonLike, FormulaireCommentaire } from "@/components/communique-interactions";
 import { DeleteButton } from "@/components/ui";
+import { Avatar } from "@/components/avatar";
 import { supprimerCommentaire } from "@/app/actions/communiques";
 import { formatDate, urlPublique } from "@/lib/format";
 import type { Commentaire, Communique } from "@/lib/types";
 
 type CommuniqueComplet = Communique & {
   likes: { user_id: string }[];
-  commentaires: (Commentaire & { profiles: { nom: string; role: string } | null })[];
+  commentaires: (Commentaire & { profiles: { nom: string; role: string; avatar_path: string | null } | null })[];
 };
 
 export async function generateMetadata({ params }: PageProps<"/communiques/[id]">) {
@@ -28,7 +29,7 @@ export default async function PageCommunique({ params }: PageProps<"/communiques
   const [{ data: c }, session] = await Promise.all([
     supabase
       .from("communiques")
-      .select("*, likes(user_id), commentaires(*, profiles(nom, role))")
+      .select("*, likes(user_id), commentaires(*, profiles(nom, role, avatar_path))")
       .eq("id", id)
       .single<CommuniqueComplet>(),
     getSession(),
@@ -81,8 +82,9 @@ export default async function PageCommunique({ params }: PageProps<"/communiques
           {commentaires.map((com) => (
             <li key={com.id} className="carte p-4">
               <div className="mb-1 flex items-center justify-between gap-2">
-                <p className="text-sm">
-                  <span className="font-semibold">{com.profiles?.nom ?? "Utilisateur"}</span>
+                <p className="flex flex-wrap items-center text-sm">
+                  <Avatar nom={com.profiles?.nom ?? ""} path={com.profiles?.avatar_path} taille={28} />
+                  <span className="ml-2 font-semibold">{com.profiles?.nom ?? "Utilisateur"}</span>
                   {com.profiles?.role === "admin" && (
                     <span className="badge ml-2 bg-primaire-pale text-primaire">Bureau UET</span>
                   )}

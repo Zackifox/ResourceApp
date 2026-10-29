@@ -20,6 +20,12 @@ export const getSession = cache(async () => {
   return { user, profile, isAdmin: profile?.role === "admin" };
 });
 
+export async function requireSession(suite: string) {
+  const session = await getSession();
+  if (!session) redirect(`/connexion?suite=${suite}`);
+  return session;
+}
+
 export async function requireAdmin() {
   const session = await getSession();
   if (!session) redirect("/connexion?suite=/admin");

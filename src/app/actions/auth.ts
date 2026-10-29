@@ -29,16 +29,22 @@ export async function inscription(_: ActionState, formData: FormData): Promise<A
   const nom = String(formData.get("nom") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
   const motDePasse = String(formData.get("mot_de_passe") ?? "");
+  const confirmation = String(formData.get("confirmation") ?? "");
+  // Facultatifs ; la base vérifie que la filière et le niveau existent
+  const filiereId = String(formData.get("filiere_id") ?? "") || null;
+  const niveau = String(formData.get("niveau") ?? "") || null;
 
   if (nom.length < 2) return { error: "Veuillez indiquer votre nom complet." };
+  if (nom.length > 80) return { error: "Le nom est trop long (80 caractères max)." };
   if (motDePasse.length < 8) return { error: "Le mot de passe doit contenir au moins 8 caractères." };
+  if (motDePasse !== confirmation) return { error: "Les deux mots de passe ne sont pas identiques." };
 
   const origin = (await headers()).get("origin") ?? "";
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({
     email,
     password: motDePasse,
-    options: { data: { nom }, emailRedirectTo: `${origin}/auth/callback` },
+    options: { data: { nom, filiere_id: filiereId, niveau }, emailRedirectTo: `${origin}/auth/callback` },
   });
 
   if (error) {

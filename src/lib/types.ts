@@ -6,6 +6,10 @@ export type Profile = {
   id: string;
   nom: string;
   role: Role;
+  filiere_id: string | null;
+  niveau: string | null;
+  bio: string | null;
+  avatar_path: string | null;
   created_at: string;
 };
 
@@ -65,5 +69,30 @@ export type Commentaire = {
   contenu: string;
   created_at: string;
 };
+
+export type Salon = {
+  id: string;
+  filiere_id: string | null;
+  nom: string;
+  ordre: number;
+};
+
+export type Conversation = {
+  id: string;
+  user1: string;
+  user2: string;
+  dernier_message_at: string;
+};
+
+// Message affiché dans un salon ou une conversation privée
+export type Message = {
+  id: string;
+  user_id: string;
+  contenu: string;
+  created_at: string;
+  profiles: { nom: string; role: Role; avatar_path: string | null } | null;
+};
+
+export type Canal = { type: "salon"; id: string } | { type: "prive"; id: string };
 
 export type ActionState = { error?: string; message?: string } | undefined;
