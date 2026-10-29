@@ -16,10 +16,17 @@ export default async function PageConnexion({ searchParams }: PageProps<"/connex
         </p>
         {erreur === "lien" && (
           <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-rouge">
-            Le lien de confirmation est invalide ou a expiré.
+            Le lien reçu par e-mail est invalide ou a expiré. Pour un mot de passe oublié, ouvrez
+            le lien sur l&apos;appareil et dans le navigateur où vous l&apos;avez demandé, ou refaites
+            une demande.
           </p>
         )}
         <FormulaireConnexion suite={typeof suite === "string" ? suite : "/"} />
+        <p className="mt-4 text-center text-sm">
+          <Link href="/mot-de-passe-oublie" className="font-medium text-primaire hover:underline">
+            Mot de passe oublié ?
+          </Link>
+        </p>
         <p className="mt-6 text-center text-sm text-attenue">
           Pas encore de compte ?{" "}
           <Link href="/inscription" className="font-medium text-primaire hover:underline">

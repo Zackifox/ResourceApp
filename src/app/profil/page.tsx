@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { requireSession } from "@/lib/auth";
 import { institutsEtFilieres } from "@/lib/structure";
@@ -20,6 +21,10 @@ export default async function PageProfil() {
       <p className="mb-6 text-sm text-attenue">
         {session.user.email}
         {profil && <> · Inscrit le {formatDate(profil.created_at)}</>}
+        {" · "}
+        <Link href="/nouveau-mot-de-passe" className="font-medium text-primaire hover:underline">
+          Changer de mot de passe
+        </Link>
       </p>
       <div className="carte p-6">
         {profil ? (
